@@ -10,6 +10,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
 st.markdown("# Predict LinkedIn Users")
+st.markdown("## By Jamie Hazard")
+st.markdown("## Georgetown University")
 
 "Complete the following information:"
 #Income
