@@ -10,10 +10,49 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
 st.markdown("# Predict LinkedIn Users")
-st.markdown("## By Jamie Hazard")
-st.markdown("## Georgetown University")
+st.markdown("#### By Jamie Hazard, Georgetown University, Fall 2023")
 
-"Complete the following information:"
+#Read input file
+s = pd.read_csv("social_media_usage.csv")
+
+#Function clean_sm
+def clean_sm(x):
+    return np.where(x == 1, 1, 0)
+
+#Create dataframe, update values
+ss = pd.DataFrame({
+    "sm_li":s["web1h"],
+    "Income":np.where(s["income"] >9, np.nan, s["income"]),
+    "Education":np.where(s["educ2"] >8, np.nan, s["educ2"]),
+    "Parent":np.where(s["par"]== 1, 1, 0),
+    "Marital":np.where(s["marital"] == 1, 1, 0),
+    "Female":np.where(s["gender"] == 2, 1, 0),
+    "Age":np.where(s["age"] >98, np.nan, s["age"])})
+
+#Run function clean_sm
+ss['sm_li'] = clean_sm(ss['sm_li'])
+
+#Drop NA
+ss = ss.dropna()
+
+#Create target vector and feature set
+y = ss["sm_li"]
+x = ss[["Income", "Education", "Parent", "Marital", "Female", "Age"]]
+
+#Split into training/test sets
+x_train, x_test, y_train, y_test = train_test_split(x, y, stratify=y, test_size=0.2, random_state=100)
+
+#Instantiate a logistic regression model
+lr = LogisticRegression(class_weight="balanced")
+lr.fit(x_train,y_train)
+
+#Evaluate the model
+y_pred = lr.predict(x_test)
+
+"This application calculates the likelihood that a person is a user of LinkedIn based on an input set of social media usage and a logistic regression model."
+
+"Complete the following information, which will be used to predict whether or not you are a LinkedIn user:"
+
 #Income
 Income = st.selectbox(label="Household Income",
 options=("Less than $10,000",
@@ -53,8 +92,6 @@ elif Income == "Refused":
 else:
         Income = None
 
-st.write(f"Income:  {Income}")
-
 #Education
 Education = st.selectbox(label="Highest Level of School/Degree Completed",
 options=("Less than high school (Grades 1-8 or no formal schooling)",
@@ -91,8 +128,6 @@ elif Education == "Refused":
 else:
         Education = None
 
-st.write(f"Education:  {Education}")
-
 #Parent
 Parent = st.selectbox(label="Are you a parent of a child under 18 living in your home?",
 options=("Yes",
@@ -104,8 +139,6 @@ if Parent == "Yes":
         Parent = 1
 else:
         Parent = 0
-
-st.write(f"Parent:  {Parent}")
 
 #Marital
 Marital = st.selectbox(label="Marital Status",
@@ -123,8 +156,6 @@ if Marital == "Married":
 else:
         Marital = 0
 
-st.write(f"Marital:  {Marital}")
-
 #Female
 Female = st.selectbox(label="Gender",
 options=("Male",
@@ -138,11 +169,29 @@ if Female == "Female":
 else:
         Female = 0
 
-st.write(f"Female:  {Female}")
-
 #Age
 age_values = list(range(0, 99))
 Age = st.selectbox("Select Age:", age_values)
 
-st.write(f"Age:  {Age}")
+#Display input results (temporary)
+#st.write(f"Income:  {Income}")
+#st.write(f"Education:  {Education}")
+#st.write(f"Parent:  {Parent}")
+#st.write(f"Marital:  {Marital}")
+#st.write(f"Female:  {Female}")
+#st.write(f"Age:  {Age}")
+
+#Use inputs to update dataframe
+pred_df = pd.DataFrame({
+    "Income": [Income],
+    "Education": [Education],
+    "Parent": [Parent],
+    "Marital": [Marital],
+    "Female": [Female],
+    "Age": [Age]})
+
+#Calculate probability
+probability = lr.predict_proba(pred_df)[:, 1]
+probability_pct = round(probability[0]*100,2)
+st.write(f"**The probability of being a LinkedIn user is:  {probability_pct}%**")
 
