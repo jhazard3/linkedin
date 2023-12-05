@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
-st.markdown("# Predict LinkedIn Users")
+st.markdown("# Are you LinkedIn?")
 st.markdown("#### By Jamie Hazard, Georgetown University, Fall 2023")
 
 #Read input file
@@ -169,9 +169,10 @@ if Female == "Female":
 else:
         Female = 0
 
-#Age
-age_values = list(range(0, 99))
-Age = st.selectbox("Select Age:", age_values)
+Age = st.slider(label="Age",
+                min_value = 1,
+                max_value=98,
+                value = 30)
 
 #Display input results (temporary)
 #st.write(f"Income:  {Income}")
@@ -192,6 +193,7 @@ pred_df = pd.DataFrame({
 
 #Calculate probability
 probability = lr.predict_proba(pred_df)[:, 1]
+probability_rev = 1-probability
 probability_pct = round(probability[0]*100,2)
 st.write(f"**The probability of being a LinkedIn user is:  {probability_pct}%**")
 
